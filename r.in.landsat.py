@@ -460,17 +460,9 @@ def main():
                 import_band_to_grass(arr_2d, map_name, crs_str, transform)
 
                 if band_name in SR_BANDS:
-                    gs.mapcalc(
-                        f"{map_name} = float({map_name}) * {SR_SCALE} + ({SR_OFFSET})",
-                        overwrite=True, quiet=True,
-                    )
                     gs.run_command("r.colors", map=map_name, color="grey", quiet=True)
                 elif band_name in ST_BANDS:
-                    gs.mapcalc(
-                        f"{map_name} = float({map_name}) * {ST_SCALE} + ({ST_OFFSET})",
-                        overwrite=True, quiet=True,
-                    )
-                    gs.run_command("r.colors", map=map_name, color="celsius", quiet=True)
+                    gs.run_command("r.colors", map=map_name, color="kelvin", quiet=True)
                 elif band_name in QA_BANDS:
                     gs.mapcalc(f"{map_name} = int({map_name})", overwrite=True, quiet=True)
 
