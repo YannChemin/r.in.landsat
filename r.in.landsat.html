@@ -1,0 +1,53 @@
+<h2 id="description">DESCRIPTION</h2>
+<p><em>r.in.landsat</em> downloads Landsat Collection 2 Level-2 imagery (surface
+reflectance + surface temperature) directly into the current GRASS GIS
+project using the <a href="https://github.com/ESDS-Leipzig/cubo">cubo</a> Python
+library, from <strong>Microsoft Planetary Computer</strong> (no credentials
+required). Each acquisition date is imported as individual raster maps
+and grouped with <em>i.group</em>, following the same pattern as
+<a href="https://github.com/YannChemin/r.in.sentinel">r.in.sentinel</a>.</p>
+<pre><code>g.region n=0.52 s=0.48 e=33.34 w=33.28 res=30
+
+r.in.landsat start=2025-01-01 end=2025-07-01 clouds=70 \
+  output=l8 -c strds=l8</code></pre>
+<h3 id="bands">Bands</h3>
+<p>Default bands are the Planetary Computer <code>landsat-c2-l2</code> asset names:
+<code>coastal, blue, green, red, nir08, swir16, swir22</code> (surface
+reflectance, OLI bands 1-7), <code>lwir11</code> (surface temperature, already
+atmospherically corrected - no separate LST retrieval needed), and
+<code>qa_pixel</code> (bitmask QA band).</p>
+<h3 id="physical-units">Physical units</h3>
+<p>Unlike <em>r.in.sentinel</em> (which leaves Sentinel-2 as raw DN), bands here
+are rescaled to physical units on import, using the official USGS
+Collection 2 Level 2 scale/offset factors:</p>
+<ul>
+<li>Surface reflectance bands: <code>reflectance = DN * 0.0000275 - 0.2</code> (range 0-1)</li>
+<li><code>lwir11</code> (surface temperature): <code>temperature_K = DN * 0.00341802 + 149.0</code></li>
+</ul>
+<p><code>qa_pixel</code> is left as an integer bitmask.</p>
+<h3 id="cloud-masking">Cloud masking</h3>
+<p>The <strong>c</strong> flag nulls out pixels where QA_PIXEL bit 3 (cloud) or bit 4
+(cloud shadow) is set, in every band for that date (auto-adds
+<code>qa_pixel</code> to the band list if not already requested).</p>
+<h3 id="output-naming">Output naming</h3>
+<p>Raster maps are named <code>{output}_{YYYYMMDD}_{band}</code>, e.g.
+<code>l8_20250222_lwir11</code>. One <em>i.group</em> per acquisition date:
+<code>{output}_{YYYYMMDD}</code>.</p>
+<h3 id="space-time-raster-dataset-strds">Space-Time Raster Dataset (STRDS)</h3>
+<p>Pass <strong>strds</strong>=<em>prefix</em> to additionally register one STRDS per band
+(<code>{prefix}_{band}</code>, e.g. <code>l8_red</code>, <code>l8_lwir11</code>). Only maps confirmed to
+exist in the current project after import are registered - a band
+that failed to import for a given date is silently excluded from its
+STRDS rather than breaking <code>t.register</code> for the whole run.</p>
+<h2 id="notes">NOTES</h2>
+<p>Landsat 8/9 revisit is 16 days each (8 days combined, since both share
+the <code>landsat-c2-l2</code> collection) - expect far sparser dates than
+Sentinel-1/2 over the same period.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<p><em><a href="r.in.sentinel.md">r.in.sentinel</a>, <a href="i.albedo.md">i.albedo</a>,
+<a href="i.emissivity.md">i.emissivity</a>, <a href="i.eb.netrad.md">i.eb.netrad</a>,
+<a href="i.eb.soilheatflux.md">i.eb.soilheatflux</a>,
+<a href="i.eb.hsebal95.md">i.eb.hsebal95</a>, <a href="i.eb.evapfr.md">i.eb.evapfr</a>,
+<a href="i.biomass.md">i.biomass</a></em></p>
+<h2 id="author">AUTHOR</h2>
+<p>Yann Chemin</p>
