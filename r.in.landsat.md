@@ -25,14 +25,14 @@ atmospherically corrected - no separate LST retrieval needed), and
 
 ### Physical units
 
-Unlike *r.in.sentinel* (which leaves Sentinel-2 as raw DN), bands here
-are rescaled to physical units on import, using the official USGS
-Collection 2 Level 2 scale/offset factors:
-
-- Surface reflectance bands: `reflectance = DN * 0.0000275 - 0.2` (range 0-1)
-- `lwir11` (surface temperature): `temperature_K = DN * 0.00341802 + 149.0`
-
-`qa_pixel` is left as an integer bitmask.
+Unlike *r.in.sentinel* (which leaves Sentinel-2 as raw DN, since its
+STAC metadata carries no scale/offset transform), bands here arrive
+already in physical units: reflectance bands as [0-1] and `lwir11` as
+Kelvin. Planetary Computer's `landsat-c2-l2` STAC items carry the USGS
+Collection 2 Level 2 scale/offset as `raster:bands` metadata, and
+`cubo`/`stackstac` applies it while building the cube - no additional
+rescaling is done (or needed) by this module. `qa_pixel` is left as an
+integer bitmask.
 
 ### Cloud masking
 
