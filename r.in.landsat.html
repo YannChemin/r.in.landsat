@@ -17,14 +17,14 @@ reflectance, OLI bands 1-7), <code>lwir11</code> (surface temperature, already
 atmospherically corrected - no separate LST retrieval needed), and
 <code>qa_pixel</code> (bitmask QA band).</p>
 <h3 id="physical-units">Physical units</h3>
-<p>Unlike <em>r.in.sentinel</em> (which leaves Sentinel-2 as raw DN), bands here
-are rescaled to physical units on import, using the official USGS
-Collection 2 Level 2 scale/offset factors:</p>
-<ul>
-<li>Surface reflectance bands: <code>reflectance = DN * 0.0000275 - 0.2</code> (range 0-1)</li>
-<li><code>lwir11</code> (surface temperature): <code>temperature_K = DN * 0.00341802 + 149.0</code></li>
-</ul>
-<p><code>qa_pixel</code> is left as an integer bitmask.</p>
+<p>Unlike <em>r.in.sentinel</em> (which leaves Sentinel-2 as raw DN, since its
+STAC metadata carries no scale/offset transform), bands here arrive
+already in physical units: reflectance bands as [0-1] and <code>lwir11</code> as
+Kelvin. Planetary Computer’s <code>landsat-c2-l2</code> STAC items carry the USGS
+Collection 2 Level 2 scale/offset as <code>raster:bands</code> metadata, and
+<code>cubo</code>/<code>stackstac</code> applies it while building the cube - no additional
+rescaling is done (or needed) by this module. <code>qa_pixel</code> is left as an
+integer bitmask.</p>
 <h3 id="cloud-masking">Cloud masking</h3>
 <p>The <strong>c</strong> flag nulls out pixels where QA_PIXEL bit 3 (cloud) or bit 4
 (cloud shadow) is set, in every band for that date (auto-adds
