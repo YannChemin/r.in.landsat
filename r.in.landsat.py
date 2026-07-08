@@ -141,19 +141,17 @@ import grass.script as gs
 # True-color composite: Landsat Collection 2 asset names for red, green, blue
 RGB_BANDS = ("red", "green", "blue")
 
-# Optical (surface reflectance) bands: USGS Collection 2 Level 2 scale/offset
-# to convert the raw scaled integer DN to reflectance [0-1].
-# reflectance = DN * SR_SCALE + SR_OFFSET
+# Optical (surface reflectance, [0-1]) and thermal (surface temperature, K)
+# bands. Planetary Computer's STAC items carry the USGS Collection 2 Level 2
+# scale/offset as raster:bands metadata, and cubo/stackstac applies it while
+# building the cube - these arrive already in physical units, unlike
+# Sentinel-2 in r.in.sentinel (whose STAC metadata carries no such transform,
+# so raw DN is deliberately left for the caller). Confirmed empirically:
+# rescaling here a second time turned real ~310 K surface temperatures into
+# a uniform, meaningless ~150 K. No rescale needed - these sets exist only to
+# pick the right r.colors table and r.support units string per band.
 SR_BANDS = {"coastal", "blue", "green", "red", "nir08", "swir16", "swir22"}
-SR_SCALE = 0.0000275
-SR_OFFSET = -0.2
-
-# Thermal (surface temperature) band: USGS Collection 2 Level 2 scale/offset
-# to convert the raw scaled integer DN to Kelvin.
-# temperature_K = DN * ST_SCALE + ST_OFFSET
 ST_BANDS = {"lwir11"}
-ST_SCALE = 0.00341802
-ST_OFFSET = 149.0
 
 # qa_pixel is a bitmask, not a physical quantity - never rescaled.
 QA_BANDS = {"qa_pixel", "qa_radsat", "qa_aerosol"}
