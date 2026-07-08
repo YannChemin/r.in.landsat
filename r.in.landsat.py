@@ -545,6 +545,21 @@ def main():
     )
 
     if strds_prefix and imported_maps_total > 0:
+        # Confirm every candidate map actually exists in the current
+        # mapset/project before registering it in a STRDS - a name being in
+        # band_map_registry only means import_band_to_grass() didn't raise,
+        # not that r.import necessarily left a valid map behind (e.g. an
+        # edge tile with no overlap can still exit 0 while writing nothing
+        # useful). One g.list call, not one g.findfile per map.
+        mapset = gs.gisenv()["MAPSET"]
+        existing_rasters = set(gs.list_grouped("raster").get(mapset, []))
+        for band_name, map_list in band_map_registry.items():
+            confirmed = [m for m in map_list if m in existing_rasters]
+            missing = set(map_list) - existing_rasters
+            for m in missing:
+                gs.warning(f"'{m}' was not found in the current project after import; excluding it from STRDS registration.")
+            band_map_registry[band_name] = confirmed
+
         gs.message("Creating Space-Time Raster Datasets…")
         try:
             import grass.temporal as tgis
